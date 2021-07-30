@@ -1,7 +1,7 @@
 package staff
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/opentracing/opentracing-go"
 
 	"github.com/touchtechnologies-product/go-blueprint-clean-architecture/app/view"
@@ -24,18 +24,17 @@ import (
 // @Success 500 {object} view.ErrResp
 // @Success 503 {object} view.ErrResp
 // @Router /staffs [get]
-func (ctrl *Controller) List(c *gin.Context) {
+func (ctrl *Controller) List(c *fiber.Ctx) error {
 	span, ctx := opentracing.StartSpanFromContextWithTracer(
-		c.Request.Context(),
+		c.Context(),
 		opentracing.GlobalTracer(),
 		"handler.staff.List",
 	)
 	defer span.Finish()
 
 	input := &domain.PageOption{}
-	if err := c.ShouldBind(input); err != nil {
-		view.MakeErrResp(c, err)
-		return
+	if err := c.QueryParser(input); err != nil {
+		return view.MakeErrResp(c, err)
 	}
 
 	if len(input.Sorts) < 1 {
@@ -44,9 +43,8 @@ func (ctrl *Controller) List(c *gin.Context) {
 
 	total, items, err := ctrl.service.List(ctx, input)
 	if err != nil {
-		view.MakeErrResp(c, err)
-		return
+		return view.MakeErrResp(c, err)
 	}
 
-	view.MakePaginatorResp(c, total, items)
+	return view.MakePaginatorResp(c, total, items)
 }

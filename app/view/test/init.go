@@ -1,17 +1,21 @@
 package test
 
 import (
-	"net/http/httptest"
-
-	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/suite"
+	"github.com/valyala/fasthttp"
 )
 
 type PackageTestSuite struct {
 	suite.Suite
-	ctx *gin.Context
+	router   *fiber.App
+	ctx      *fiber.Ctx
+	validate *validator.Validate
 }
 
 func (suite *PackageTestSuite) SetupSuite() {
-	suite.ctx, _ = gin.CreateTestContext(httptest.NewRecorder())
+	suite.router = fiber.New()
+	suite.ctx = suite.router.AcquireCtx(&fasthttp.RequestCtx{})
+	suite.validate = validator.New()
 }

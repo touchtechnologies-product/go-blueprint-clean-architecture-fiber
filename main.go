@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	ginLogRus "github.com/toorop/gin-logrus"
-
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/touchtechnologies-product/go-blueprint-clean-architecture/config"
 )
 
@@ -15,11 +15,14 @@ func main() {
 	log := setupLog()
 
 	// Gin setup
-	router := gin.New()
-
+	router := fiber.New()
 	// Set custom log for gin
-	router.Use(ginLogRus.Logger(log), gin.Recovery())
-
+	router.Use(logger.New(logger.Config{
+		// For more options, see the Config section
+		Format: "${pid} ${locals:requestid} ${status} - ${method} ${path}",
+	}), cors.New(cors.Config{
+		ExposeHeaders: "X-Content-Length",
+	}))
 	// Jaeger setup
 	closer := setupJaeger(appConfig)
 	defer func() {
@@ -32,5 +35,5 @@ func main() {
 	_ = newApp(appConfig).RegisterRoute(router)
 
 	// Gin start listen
-	_ = router.Run()
+	_ = router.Listen(":8080")
 }

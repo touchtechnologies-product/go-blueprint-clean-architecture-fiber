@@ -11,19 +11,19 @@ import (
 )
 
 func (suite *PackageTestSuite) TestList() {
-	req, resp, err := makeListReq()
+	req, _, err := makeListReq()
 	suite.NoError(err)
 
 	opt := &domain.PageOption{
 		Page:    1,
 		PerPage: 10,
-		Sorts: []string{"createdAt:desc"},
+		Sorts:   []string{"createdAt:desc"},
 	}
 
 	suite.service.On("List", mock.Anything, opt).Return(0, []*out.CompanyView{}, nil)
-	suite.router.ServeHTTP(resp, req)
+	res, _ := suite.router.Test(req, -1)
 
-	suite.Equal(http.StatusNoContent, resp.Code)
+	suite.Equal(http.StatusNoContent, res.StatusCode)
 }
 
 func makeListReq() (req *http.Request, w *httptest.ResponseRecorder, err error) {

@@ -1,7 +1,7 @@
 package company
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/opentracing/opentracing-go"
 
 	"github.com/touchtechnologies-product/go-blueprint-clean-architecture/app/view"
@@ -24,25 +24,23 @@ import (
 // @Success 500 {object} view.ErrResp
 // @Success 503 {object} view.ErrResp
 // @Router /companies [post]
-func (ctrl *Controller) Create(c *gin.Context) {
+func (ctrl *Controller) Create(c *fiber.Ctx) error {
 	span, ctx := opentracing.StartSpanFromContextWithTracer(
-		c.Request.Context(),
+		c.Context(),
 		opentracing.GlobalTracer(),
 		"handler.company.Create",
 	)
 	defer span.Finish()
 
 	input := &companyin.CreateInput{}
-	if err := c.ShouldBindJSON(input); err != nil {
-		view.MakeErrResp(c, err)
-		return
+	if err := c.BodyParser(input); err != nil {
+		return view.MakeErrResp(c, err)
 	}
 
 	ID, err := ctrl.service.Create(ctx, input)
 	if err != nil {
-		view.MakeErrResp(c, err)
-		return
+		return view.MakeErrResp(c, err)
 	}
 
-	view.MakeCreatedResp(c, ID)
+	return view.MakeCreatedResp(c, ID)
 }

@@ -1,13 +1,12 @@
 package view
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 
 	"github.com/touchtechnologies-product/go-blueprint-clean-architecture/service/util"
-
-	"github.com/gin-gonic/gin"
 )
 
 const errorStatus = "ERROR"
@@ -16,21 +15,21 @@ type ErrResp struct {
 	Status string     `json:"status"`
 	Code   int        `json:"code"`
 	Errors []*ErrItem `json:"errors"`
-}// @Name ErrorResponse
+} // @Name ErrorResponse
 
 type ErrItem struct {
 	Cause   string `json:"cause"`
 	Code    string `json:"code"`
 	SubCode string `json:"subCode"`
-}// @Name ErrorItemResponse
+} // @Name ErrorItemResponse
 
-func MakeErrResp(c *gin.Context, err error) {
+func MakeErrResp(c *fiber.Ctx, err error) error {
 	errResp := &ErrResp{
 		Status: errorStatus,
 		Code:   getHTTPStatusCode(err),
 		Errors: getRespErrors(err),
 	}
-	c.JSON(errResp.Code, errResp)
+	return c.Status(errResp.Code).JSON(errResp)
 }
 
 func getHTTPStatusCode(err error) (code int) {

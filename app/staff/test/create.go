@@ -16,11 +16,11 @@ func (suite *PackageTestSuite) TestCreate() {
 	req, resp, err := suite.makeCreateReq(input)
 	suite.NoError(err)
 
-	newID := "test"
+	newID := ""
 	suite.service.On("Create", mock.Anything, input).Return(newID, nil)
-	suite.router.ServeHTTP(resp, req)
+	res, _ := suite.router.Test(req, -1)
 
-	suite.Equal(http.StatusCreated, resp.Code)
+	suite.Equal(http.StatusCreated, res.StatusCode)
 	suite.Equal(newID, resp.Header().Get("Content-Location"))
 }
 

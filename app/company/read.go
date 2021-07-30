@@ -1,9 +1,9 @@
 package company
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/opentracing/opentracing-go"
 
 	"github.com/touchtechnologies-product/go-blueprint-clean-architecture/app/view"
@@ -23,21 +23,21 @@ import (
 // @Success 500 {object} view.ErrResp
 // @Success 503 {object} view.ErrResp
 // @Router /companies/{company_id} [get]
-func (ctrl *Controller) Read(c *gin.Context) {
+func (ctrl *Controller) Read(c *fiber.Ctx) error {
 	span, ctx := opentracing.StartSpanFromContextWithTracer(
-		c.Request.Context(),
+		c.Context(),
 		opentracing.GlobalTracer(),
 		"handler.company.Read",
 	)
 	defer span.Finish()
 
-	input := &companyin.ReadInput{CompanyID: c.Param("id")}
+	input := &companyin.ReadInput{CompanyID: c.Params("id")}
 
 	company, err := ctrl.service.Read(ctx, input)
 	if err != nil {
-		view.MakeErrResp(c, err)
-		return
+		return view.MakeErrResp(c, err)
+
 	}
 
-	view.MakeSuccessResp(c, http.StatusOK, company)
+	return view.MakeSuccessResp(c, http.StatusOK, company)
 }

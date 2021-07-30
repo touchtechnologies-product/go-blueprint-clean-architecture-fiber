@@ -1,9 +1,9 @@
 package company
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/opentracing/opentracing-go"
 
 	"github.com/touchtechnologies-product/go-blueprint-clean-architecture/app/view"
@@ -25,23 +25,22 @@ import (
 // @Success 500 {object} view.ErrResp
 // @Success 503 {object} view.ErrResp
 // @Router /companies/{company_id} [delete]
-func (ctrl *Controller) Delete(c *gin.Context) {
+func (ctrl *Controller) Delete(c *fiber.Ctx) error {
 	span, ctx := opentracing.StartSpanFromContextWithTracer(
-		c.Request.Context(),
+		c.Context(),
 		opentracing.GlobalTracer(),
 		"handler.company.Delete",
 	)
 	defer span.Finish()
 
 	input := &companyin.DeleteInput{
-		ID:    c.Param("id"),
+		ID: c.Params("id"),
 	}
 
 	err := ctrl.service.Delete(ctx, input)
 	if err != nil {
-		view.MakeErrResp(c, err)
-		return
+		return view.MakeErrResp(c, err)
 	}
 
-	view.MakeSuccessResp(c, http.StatusOK, nil)
+	return view.MakeSuccessResp(c, http.StatusOK, nil)
 }

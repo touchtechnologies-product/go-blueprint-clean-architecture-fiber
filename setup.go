@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	validatorService "github.com/touchtechnologies-product/go-blueprint-clean-architecture/service/validator"
+	"github.com/uber/jaeger-client-go/rpcmetrics"
 	"io"
 	"log"
 
@@ -30,14 +31,19 @@ func setupJaeger(appConfig *config.Config) io.Closer {
 	cfg.ServiceName = appConfig.AppName
 	cfg.Sampler.Type = "const"
 	cfg.Sampler.Param = 1
-	cfg.Reporter = &jaegerConf.ReporterConfig{LogSpans: true}
+	cfg.Reporter = &jaegerConf.ReporterConfig{
+		LogSpans:           true,
+		LocalAgentHostPort: appConfig.JaegerAgentHost + ":" + appConfig.JaegerAgentPort,
+	}
 
 	jLogger := jaegerLog.StdLogger
 	jMetricsFactory := metrics.NullFactory
+	jMetricsFactory = jMetricsFactory.Namespace(metrics.NSOptions{Name: appConfig.AppName, Tags: nil})
 
 	tracer, closer, err := cfg.NewTracer(
 		jaegerConf.Logger(jLogger),
 		jaegerConf.Metrics(jMetricsFactory),
+		jaegerConf.Observer(rpcmetrics.NewObserver(jMetricsFactory, rpcmetrics.DefaultNameNormalizer)),
 	)
 	panicIfErr(err)
 	opentracing.SetGlobalTracer(tracer)

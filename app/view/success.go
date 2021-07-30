@@ -1,10 +1,9 @@
 package view
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -17,26 +16,26 @@ type SuccessResp struct {
 	Status string      `json:"status"`
 	Code   int         `json:"code"`
 	Data   interface{} `json:"data"`
-}// @Name SuccessResponse
+} // @Name SuccessResponse
 
-func MakeSuccessResp(c *gin.Context, status int, data interface{}) {
-	c.JSON(status, SuccessResp{
+func MakeSuccessResp(c *fiber.Ctx, status int, data interface{}) error {
+	return c.Status(status).JSON(SuccessResp{
 		Status: okStatus,
 		Code:   status,
 		Data:   data,
 	})
 }
 
-func MakePaginatorResp(c *gin.Context, total int, items interface{}) {
+func MakePaginatorResp(c *fiber.Ctx, total int, items interface{}) error {
 	status := http.StatusOK
 	if total < 1 {
 		status = http.StatusNoContent
 	}
-	c.Header(xContentLength, strconv.Itoa(total))
-	MakeSuccessResp(c, status, items)
+	c.Set(xContentLength, strconv.Itoa(total))
+	return MakeSuccessResp(c, status, items)
 }
 
-func MakeCreatedResp(c *gin.Context, ID string) {
-	c.Header(location, ID)
-	MakeSuccessResp(c, http.StatusCreated, nil)
+func MakeCreatedResp(c *fiber.Ctx, ID string) error {
+	c.Set(location, ID)
+	return MakeSuccessResp(c, http.StatusCreated, nil)
 }

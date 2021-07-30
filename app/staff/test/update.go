@@ -14,13 +14,13 @@ import (
 
 func (suite *PackageTestSuite) TestUpdate() {
 	input := staffin.MakeTestUpdateInput()
-	req, resp, err := suite.makeUpdateReq(input)
+	req, _, err := suite.makeUpdateReq(input)
 	suite.NoError(err)
 
 	suite.service.On("Update", mock.Anything, input).Return(nil)
-	suite.router.ServeHTTP(resp, req)
+	res, _ := suite.router.Test(req, -1)
 
-	suite.Equal(http.StatusOK, resp.Code)
+	suite.Equal(http.StatusOK, res.StatusCode)
 }
 
 func (suite *PackageTestSuite) makeUpdateReq(input *staffin.UpdateInput) (req *http.Request, w *httptest.ResponseRecorder, err error) {

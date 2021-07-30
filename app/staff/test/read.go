@@ -13,13 +13,13 @@ import (
 
 func (suite *PackageTestSuite) TestRead() {
 	input := staffin.MakeTestReadInput()
-	req, resp, err := makeReadReq(input)
+	req, _, err := makeReadReq(input)
 	suite.NoError(err)
 
 	suite.service.On("Read", mock.Anything, input).Return(&out.StaffView{}, nil)
-	suite.router.ServeHTTP(resp, req)
+	res, _ := suite.router.Test(req, -1)
 
-	suite.Equal(http.StatusOK, resp.Code)
+	suite.Equal(http.StatusOK, res.StatusCode)
 }
 
 func makeReadReq(input *staffin.ReadInput) (req *http.Request, w *httptest.ResponseRecorder, err error) {

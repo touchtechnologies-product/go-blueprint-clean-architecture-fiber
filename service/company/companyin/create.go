@@ -16,6 +16,10 @@ func MakeTestCreateInput() (input *CreateInput) {
 	}
 }
 
+func MakeTestCreateInputErr() (input *CreateInput) {
+	return &CreateInput{}
+}
+
 func CreateInputToCompanyDomain(input *CreateInput) (company *domain.Company) {
 	return &domain.Company{
 		ID:   input.ID,

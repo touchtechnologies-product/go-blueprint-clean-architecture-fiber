@@ -14,13 +14,13 @@ import (
 
 func (suite *PackageTestSuite) TestDelete() {
 	input := staffin.MakeTestDeleteInput()
-	req, resp, err := suite.makeDeleteReq(input)
+	req, _, err := suite.makeDeleteReq(input)
 	suite.NoError(err)
 
 	suite.service.On("Delete", mock.Anything, input).Return(nil)
-	suite.router.ServeHTTP(resp, req)
+	res, _ := suite.router.Test(req, -1)
 
-	suite.Equal(http.StatusOK, resp.Code)
+	suite.Equal(http.StatusOK, res.StatusCode)
 }
 
 func (suite *PackageTestSuite) makeDeleteReq(input *staffin.DeleteInput) (req *http.Request, w *httptest.ResponseRecorder, err error) {
